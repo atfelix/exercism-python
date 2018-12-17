@@ -16,10 +16,10 @@ class AcronymEncoder(object):
 
         char = self.scanner.get_next_char()
 
-        if char.isalpha() and self.searching_for_word:
+        if (char.isalpha() or char == '\'') and self.searching_for_word:
             self.searching_for_word = False
             return char.upper()
-        elif not char.isalpha():
+        elif not (char.isalpha() or char == '\''):
             self.searching_for_word = True
         
         return ''

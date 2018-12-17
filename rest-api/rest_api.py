@@ -35,18 +35,9 @@ class User(object):
         self.balance_dict[name] = self.balance_dict.get(name, 0) + amount
     
     @property
-    def regular_json(self):
+    def json(self):
         return {
             'name': self.name,
-            'owes': self.owes,
-            'owed_by': self.owed_by,
-            'balance': self.balance
-        }
-    
-    @property
-    def add_json(self):
-        return {
-            'user': self.name,
             'owes': self.owes,
             'owed_by': self.owed_by,
             'balance': self.balance
@@ -59,9 +50,9 @@ class RestAPI(object):
 
     def get(self, url, payload=None):
         name = convert_payload(payload).get('users') if payload else None
-        users = self.usersWithNames(set([name]) if name else None)
+        users = self.usersWithNames(set(tuple(name)) if name else None)
 
-        return json.dumps({'users': users}, default=lambda user: user.regular_json)
+        return json.dumps({'users': users}, default=lambda user: user.json)
     
     def usersWithNames(self, names=None):
         if names is None:
@@ -79,7 +70,7 @@ class RestAPI(object):
         user = User(user=user)
         self.database[user.name] = user
 
-        return json.dumps(user, default=lambda user: user.add_json)
+        return json.dumps(user, default=lambda user: user.json)
 
     def addIOU(self, lender, borrower, amount):
         self.database[lender].lend(borrower, amount)
@@ -87,6 +78,6 @@ class RestAPI(object):
 
         return json.dumps(
             {'users': self.usersWithNames([lender, borrower])}, 
-            default=lambda user: user.regular_json
+            default=lambda user: user.json
         )
 

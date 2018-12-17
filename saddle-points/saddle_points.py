@@ -15,7 +15,7 @@ def potential_saddle_points(matrix):
 def is_saddle_point(candidate, matrix):
     row, column = candidate
     entry = matrix[row][column]
-    return entry == max(matrix[row]) and entry == min(matrix[i][column] for i in range(len(matrix[0])))
+    return entry == max(matrix[row]) and entry == min(matrix[i][column] for i in range(len(matrix)))
         
 def max_entries(row):
     max_entry = max(row)

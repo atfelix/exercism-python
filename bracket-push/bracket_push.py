@@ -18,4 +18,6 @@ def is_paired(string):
                 return False
             else:
                 stack.pop()
+        elif char in ending_pairs:
+            return False
     return len(stack) == 0

@@ -3,7 +3,7 @@ import unittest
 import hamming
 
 
-# Tests adapted from `problem-specifications//canonical-data.json` @ v2.0.1
+# Tests adapted from `problem-specifications//canonical-data.json` @ v2.1.1
 
 class HammingTest(unittest.TestCase):
 
@@ -47,12 +47,22 @@ class HammingTest(unittest.TestCase):
         self.assertEqual(hamming.distance("GGACGGATTCTG", "AGGACGGATTCT"), 9)
 
     def test_disallow_first_strand_longer(self):
-        with self.assertRaises(ValueError):
+        with self.assertRaisesWithMessage(ValueError):
             hamming.distance("AATG", "AAA")
 
     def test_disallow_second_strand_longer(self):
-        with self.assertRaises(ValueError):
+        with self.assertRaisesWithMessage(ValueError):
             hamming.distance("ATA", "AGTG")
+
+    # Utility functions
+    def setUp(self):
+        try:
+            self.assertRaisesRegex
+        except AttributeError:
+            self.assertRaisesRegex = self.assertRaisesRegexp
+
+    def assertRaisesWithMessage(self, exception):
+        return self.assertRaisesRegex(exception, r".+")
 
 
 if __name__ == '__main__':

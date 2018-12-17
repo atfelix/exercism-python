@@ -3,7 +3,7 @@ import unittest
 from clock import Clock
 
 
-# Tests adapted from `problem-specifications//canonical-data.json` @ v2.2.1
+# Tests adapted from `problem-specifications//canonical-data.json` @ v2.4.0
 
 class ClockTest(unittest.TestCase):
     # Test creating a new clock with an initial time.
@@ -57,6 +57,9 @@ class ClockTest(unittest.TestCase):
 
     def test_negative_minutes_roll_over_continuously(self):
         self.assertEqual(str(Clock(1, -4820)), '16:40')
+
+    def test_negative_sixty_minutes_is_previous_hour(self):
+        self.assertEqual(str(Clock(2, -60)), '01:00')
 
     def test_negative_hour_and_minutes_both_roll_over(self):
         self.assertEqual(str(Clock(-25, -160)), '20:20')
@@ -158,6 +161,9 @@ class ClockTest(unittest.TestCase):
 
     def test_clocks_with_negative_hours_and_minutes_that_wrap(self):
         self.assertEqual(Clock(18, 7), Clock(-54, -11513))
+
+    def test_full_clock_and_zeroed_clock(self):
+        self.assertEqual(Clock(24, 0), Clock(0, 0))
 
 
 if __name__ == '__main__':

@@ -4,7 +4,7 @@ import operator
 import list_ops
 
 
-# Tests adapted from problem-specifications//canonical-data.json @ v2.3.0
+# Tests adapted from `problem-specifications//canonical-data.json` @ v2.3.0
 
 class ListOpsTest(unittest.TestCase):
 
@@ -76,7 +76,7 @@ class ListOpsTest(unittest.TestCase):
     def test_foldr_nonempty_list_floordiv(self):
         self.assertEqual(list_ops.foldr(operator.floordiv, [2, 5], 5), 2)
 
-    # # additional test for foldr
+    # additional test for foldr
     def test_foldr_add_str(self):
         self.assertEqual(
             list_ops.foldr(operator.add,

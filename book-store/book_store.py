@@ -1,85 +1,81 @@
 from collections import Counter
-from functools import reduce
 
 BOOK_PRICE = 800
-DISCOUNTS = (1, 1, 0.95, 0.9, 0.8, 0.75)
+DISCOUNTS = [0, 0, 5 / 100, 10 / 100, 20 / 100, 25 / 100]
 
-def group_price(book_price=BOOK_PRICE, discounts=DISCOUNTS):
-    return {quantity: book_price * quantity * discounts[quantity]
-                for quantity in range(len(discounts))}
+def calculate_total(list_of_books):
+    return DiscountCalculator(DISCOUNTS, BOOK_PRICE).calculate_total(list_of_books)
 
-GROUP_PRICE = group_price()
+class DiscountCalculator(object):
 
-def calculate_total(list_of_books, book_price=BOOK_PRICE):
-    book_counts = sorted(Counter(list_of_books).values(), reverse=True)
-    return reduce(
-        lambda acc, books: min(acc, cost_of_books(groups_of_books(books))), 
-        partitions(book_counts), 
-        book_price * len(list_of_books)
-    )
+    def __init__(self, discounts, book_price):
+        self.discounts = discounts
+        self.book_price = book_price
+        self.price_dict = self.price_for_size_dict()
+        self.ranks = self.ranking()
+    
+    def price_for_size_dict(self):
+        return {size: size * self.book_price * (1 - self.discounts[size])
+                    for size in range(len(self.discounts))}
 
-def cost_of_books(partitions_of_books, group_price_mapping=GROUP_PRICE):
-    cost = 0
-    for size, number_of_size in enumerate(partitions_of_books):
-        cost += group_price_mapping[size] * number_of_size
-    return cost
+    def ranking(self):
+        """
+        Returns a list rankings based on where the next best addition would be.
 
-def groups_of_books(partition):
-    return (0,) + tuple(partition[i] - partition[i + 1] 
-                    if i + 1 != len(partition) else partition[i]
-                    for i in range(len(partition)))
+        The zeroth element is better than the first, which is better than the
+        second and so on.  So, if this function return [2, 1, 3, 0], then
+        it would be better to add a book to a group of size two than of size one.
+        Similarly, it would be better to add to a group of size 1 than a group of
+        size 3.
+        """
+        total_discounts = [discount * quantity for (quantity, discount) in enumerate(self.discounts)]
+        increase_in_discount = [a - b for (a, b) in zip(total_discounts[1:], total_discounts)]
+        return [index_increase[0] for index_increase in sorted(
+            enumerate(increase_in_discount),
+            key=lambda index_increase: index_increase[1],
+            reverse=True
+        )]
 
-def partitions(counts):
-    """
-    This function generates all equivalent partitions for this problem.
+    def grouping(self, list_of_books):
+        """
+        Return the best grouping based on the discounts.
 
-    This algorithm is as follows:
-        If there are at most two types of books,
-        then return the list of partitions [(max counts, min counts)],
-        else we make the following observation:
+        The algorithm is as follows the below example:
 
-        Any partition can be made up of a base partition and a restricted
-        partition where the length of the restricted partition is dictated
-        by the penultimate length of the base partition and the last two
-        elements of counts.
+        Suppose the sorted book counts are [7, 6, 5, 3, 1].
 
-        For example, suppose you had counts = [5, 4, 2, 2, 1].  A valid
-        partition is 
+        At each iteration of these counts, look through the cache for the
+        best group based ranking().  Add as many books to those groups as you
+        can and then proceed unto the next best group.  Continue until you
+        have placed all the books.
+        """
+        number_of_groups = [0] * len(self.discounts)
 
-        1 1 1 1 1
-        2 2 2 2 4
-        3 3
-        4 5
+        if len(list_of_books) == 0:
+            return number_of_groups
+        
+        book_counts = sorted(Counter(list_of_books).values(), reverse=True)
+        number_of_groups[1] = book_counts[0]
+        for book_count in book_counts[1:]:
+            for rank, group_count in self.ranks_to_increased(book_count, number_of_groups):
+                number_of_groups[rank] -= group_count
+                number_of_groups[rank + 1] += group_count
+        return number_of_groups
+    
+    def ranks_to_increased(self, count, number_of_groups):
+        """
+        Returns a tuple of the rank that should be increased and the number
+        of elements that can be increased based on the number_of_groups
+        """
+        for rank in self.ranks:
+            if number_of_groups[rank] > 0:
+                yielded_count = min(count, number_of_groups[rank])
+                count -= yielded_count
+                yield rank, yielded_count
 
-        Note that this partition is equivalent to the following partition
 
-        1 1 1 1 1
-        2 2 2 2 3
-        3 4
-        4 5
-
-        In this second partition, the first two rows is the base partition
-        and the last two rows are the restricted.
-
-    @param counts:  sorted list of books counts
-
-    Returns all partitions converted to counts based on row.
-
-    For example, the above partition is returned as (5, 5, 2, 2, 0)
-    """
-    assert(all(counts[i] >= counts[i + 1] for i in range(len(counts) - 1)))
-    if len(counts) <= 2: return [tuple(counts)]
-    list_of_partitions = []
-    for base_partition in partitions(counts[:-1]):
-        for restricted_partition in restricted_partitions(base_partition[-2], 
-                                                          max(counts[-1], base_partition[-1]),
-                                                          min(counts[-1], base_partition[-1])):
-            list_of_partitions.append(base_partition[:-1] + restricted_partition)
-    return list_of_partitions
-
-def restricted_partitions(length, num_xs, num_ys):
-    """
-    Returns all partitions
-    """
-    assert(num_xs >= num_ys)
-    return [(num_xs + i, num_ys - i) for i in range(min(length - num_xs, num_ys) + 1)]
+    def calculate_total(self, list_of_books):
+        cost = 0
+        for index, size in enumerate(self.grouping(list_of_books)):
+            cost += size * self.price_dict[index]
+        return cost

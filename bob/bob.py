@@ -1,5 +1,7 @@
 def hey(phrase):
     phrase = phrase.strip()
+    if is_screaming(phrase) and is_question(phrase):
+        return 'Calm down, I know what I\'m doing!'
     if is_screaming(phrase):
         return 'Whoa, chill out!'
     elif is_question(phrase):

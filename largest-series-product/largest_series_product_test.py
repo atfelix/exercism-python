@@ -11,9 +11,9 @@ import unittest
 from largest_series_product import largest_product
 
 
-# Tests adapted from `problem-specifications//canonical-data.json` @ v1.0.0
+# Tests adapted from `problem-specifications//canonical-data.json` @ v1.2.0
 
-class SeriesTest(unittest.TestCase):
+class LargestSeriesProductTest(unittest.TestCase):
     def test_finds_the_largest_product_if_span_equals_length(self):
         self.assertEqual(largest_product("29", 2), 18)
 
@@ -66,7 +66,7 @@ class SeriesTest(unittest.TestCase):
         with self.assertRaisesWithMessage(ValueError):
             largest_product("12345", -1)
 
-    #@unittest.skip("extra-credit")
+    @unittest.skip("extra-credit")
     def test_project_euler_big_number(self):
         series = (
             "73167176531330624919225119674426574742355349194934969835203127745"
@@ -86,6 +86,13 @@ class SeriesTest(unittest.TestCase):
             "71094050775410022569831552000559357297257163626956188267042825248"
             "3600823257530420752963450")
         self.assertEqual(largest_product(series, 13), 23514624000)
+
+    # Utility functions
+    def setUp(self):
+        try:
+            self.assertRaisesRegex
+        except AttributeError:
+            self.assertRaisesRegex = self.assertRaisesRegexp
 
     def assertRaisesWithMessage(self, exception):
         return self.assertRaisesRegex(exception, r".+")
