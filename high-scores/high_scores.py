@@ -1,8 +1,10 @@
 from functools import reduce
+from heapq import nlargest
 
 class HighScores(object):
-    def __init__(self, scores):
+    def __init__(self, scores, limit=3):
         self.scores = scores
+        self.top_three = nlargest(limit, scores)
 
     def latest(self):
         return self.scores[-1]
@@ -10,12 +12,8 @@ class HighScores(object):
     def personal_best(self):
         return max(self.scores)
 
-    def personal_top(self, limit=3):
-        return reduce(
-            lambda triple, score: sorted(triple + [score], reverse=True)[:limit],
-            self.scores[limit:],
-            sorted(self.scores[:limit], reverse=True)
-        )
+    def personal_top(self):
+        return self.top_three
 
     def report(self):
         beginning = f'Your latest score was {self.latest()}'
