@@ -12,7 +12,7 @@ class HighScores(object):
     def personal_best(self):
         return max(self.scores)
 
-    def personal_top(self):
+    def personal_top_three(self):
         return self.top_three
 
     def report(self):
